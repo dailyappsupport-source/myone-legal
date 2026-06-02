@@ -1,7 +1,7 @@
 # MYONE Privacy Policy
 
 **Effective date:** 16 May 2026
-**Last updated:** 16 May 2026
+**Last updated:** 2 June 2026
 
 This Privacy Policy describes how the MYONE Android application ("MYONE", the "App", "we", "us", "our") collects, uses, stores, shares, and protects your information when you install or use the App.
 
@@ -16,7 +16,7 @@ If you do not agree with this Policy, please do not install or use MYONE.
 - MYONE is a personal finance app. Most of your financial data (transactions, accounts, balances, budgets, goals, receipts) is stored **on your device** in an encrypted-at-rest local database managed by Android.
 - If you sign in, your personal data is also synced to **Google Cloud Firestore** under your Firebase user ID so you can use it on other devices.
 - If you opt in, MYONE can back up your data to **your own Google Drive** in an app-specific folder. We never read or write any other files in your Drive.
-- We do **not** run advertising, tracking, or analytics SDKs. We do **not** sell or rent your personal data.
+- We do **not** run advertising or tracking SDKs. We use Firebase Crashlytics only for crash diagnostics. We do **not** sell or rent your personal data.
 - You can delete your data at any time from inside the App or by contacting us.
 
 ---
@@ -51,13 +51,15 @@ If you sign in with Google through Android Credential Manager or Google Sign-In,
 - **Firebase Cloud Messaging (FCM) registration token**, used to deliver push notifications to your device. The token is stored under your user record and deleted when you sign out or uninstall.
 - **Notification permission state** (Android 13+).
 - **Camera output** if you choose to attach a receipt photo to a transaction. The photo is stored on your device and only synced to your private Firestore folder if you have enabled cloud sync.
+- **Short microphone recordings** if you use AI voice input. The recording is created on your device, sent to MYONE Cloud Functions for transcription and assistant processing, and then the temporary local audio file is deleted. You can use text input instead.
+- **Crash diagnostics** through Firebase Crashlytics, such as stack traces, app version, device model, operating system version, and crash time. Crash diagnostics do not intentionally include your financial records, receipt photos, or audio recordings.
 - **Locale and basic device locale settings** used to format currency and dates. We do not log advertising IDs, IMEI, MAC, or any other persistent device identifier.
 
 ### 2.4 Information from third-party services
 
-- **CoinGecko**: when crypto pricing is enabled, the App fetches public market prices from CoinGecko. These requests do not include your account, name, email, holdings, or any personal identifier.
+- **Tokocrypto**: when crypto and PAXG-derived gold pricing is enabled, the MYONE backend fetches public market prices from Tokocrypto. The App receives cached prices from MYONE Cloud Functions; Tokocrypto requests do not include your account, name, email, holdings, or any personal identifier.
 - **Google Play Billing**: if you purchase a subscription or one-off product, Google handles the payment. The App receives a purchase token used only to verify your entitlement. We never see your full credit card or banking details.
-- **MYONE backend** (`api.myone.dailyapp.com`): used by the App for product configuration and entitlement checks. Requests include your Firebase UID and the relevant purchase token; they do not include the contents of your transactions.
+- **MYONE backend** (`api.myone.dailyapp.com`) and MYONE Cloud Functions: used by the App for product configuration, entitlement checks, AI assistant requests, receipt scanning, account deletion, shared-wallet invites, and cached market prices. Requests include only the data needed for the feature you invoke.
 
 ### 2.5 Information we do NOT collect
 
@@ -68,7 +70,7 @@ We do not collect or use:
 - Contacts, SMS, call logs, calendar.
 - Health or fitness data.
 - Biometric data (fingerprint or face). Biometric checks, if added later, are performed by the Android system on the device and we never receive the biometric value.
-- Crash analytics, product analytics, or tracking SDKs of any kind. The current build of MYONE has no analytics, advertising, attribution, or remote logging libraries integrated.
+- Product analytics, advertising, attribution, or tracking SDKs of any kind. Crashlytics is used only for crash diagnostics.
 
 ---
 
@@ -78,6 +80,7 @@ We do not collect or use:
 |---|---|
 | `INTERNET` | Cloud sync, push notifications, price feed, entitlement checks. |
 | `CAMERA` | Take photos of receipts for transactions. Photos are only saved when you tap save. |
+| `RECORD_AUDIO` | Record short voice prompts for the AI assistant when you tap the microphone. You can type instead. |
 | `POST_NOTIFICATIONS` | Show local reminders (bills, savings) and Firebase push notifications. |
 | `RECEIVE_BOOT_COMPLETED` | Re-schedule reminders after the device restarts. |
 | `READ_EXTERNAL_STORAGE` (Android 12 and below) | Pick existing receipt images from your gallery. Not requested on Android 13+. |
@@ -99,7 +102,7 @@ MYONE follows a "local first, sync optional" model.
 - Settings (theme, currency, PIN flag, PIN hash, etc.) are stored in Android DataStore.
 - Background workers (WorkManager) run reminders, recurring transactions, and sync.
 
-Android Auto Backup is enabled. The App's database, receipts, and most preferences are eligible to be backed up to your own Google Drive **by Android itself** (not by MYONE) when Auto Backup is enabled by the operating system. Sensitive keys are excluded from Auto Backup, including the PIN hash and any subscription entitlement token. The exact rules live in `app/src/main/res/xml/backup_rules.xml` and `data_extraction_rules.xml`.
+Android Auto Backup is disabled for MYONE. The App's database, receipts, and preferences are not backed up by Android Auto Backup. If you want a cloud backup, use the optional MYONE Google Drive backup feature described below.
 
 ### 4.2 Cloud sync (optional)
 
@@ -127,7 +130,7 @@ If you purchase MYONE Pro, the purchase is processed by **Google Play Billing**.
 
 ### 4.6 Public market data
 
-If you enable crypto pricing, the App requests prices from CoinGecko. Requests contain no personal data.
+If crypto or PAXG-derived gold pricing is enabled, the App requests cached prices from MYONE Cloud Functions. The backend refreshes public Tokocrypto market data for all users on a shared interval, and requests to Tokocrypto contain no personal data.
 
 ---
 
@@ -138,10 +141,11 @@ We do not sell or rent your personal data. We share data only with the providers
 | Provider | Role | What is shared | Where to learn more |
 |---|---|---|---|
 | Google Firebase (Authentication, Firestore, Cloud Messaging, Cloud Functions) | Identity, cloud sync, push, server logic | Email, UID, FCM token, your synced records | <https://firebase.google.com/support/privacy> |
+| Firebase Crashlytics | Crash diagnostics | Crash stack traces, app version, device model, operating system version, crash time | <https://firebase.google.com/support/privacy> |
 | Google Drive | Optional user-controlled backups | Backup file you generate | <https://policies.google.com/privacy> |
 | Google Play Billing | Subscription processing | Purchase token, SKU | <https://policies.google.com/privacy> |
 | Google Identity Services (Credential Manager, Google Sign-In) | Sign-in | OAuth tokens | <https://policies.google.com/privacy> |
-| CoinGecko | Crypto market prices | Anonymous price queries only | <https://www.coingecko.com/en/privacy> |
+| Tokocrypto | Crypto and PAXG-derived gold market prices | Anonymous backend price refreshes only | <https://support.tokocrypto.com/hc/en-us/articles/21694168727565-Privacy-Policy> |
 | Cloud hosting for `api.myone.dailyapp.com` | Entitlement verification, configuration | UID, purchase token | Firebase Hosting |
 
 These providers process data on our behalf under their own security and privacy commitments.
@@ -156,13 +160,13 @@ These providers process data on our behalf under their own security and privacy 
 - Drive backup files are stored in **your** Google account, in the region Google assigns to your account.
 - We retain Firestore data for as long as your account exists. When you delete your account or specific records, the corresponding Firestore documents are deleted within 30 days.
 - Operational logs (Cloud Functions logs, billing verification logs) are retained for up to 90 days for security and debugging, then rotated.
-- Backups created by Android Auto Backup follow Google's own retention rules.
+- MYONE does not use Android Auto Backup. Google Drive backup files stay in your Google Drive until you delete them.
 
 ---
 
 ## 7. Security
 
-- All network traffic between the App and Firebase, our backend, and CoinGecko uses HTTPS/TLS.
+- All network traffic between the App, Firebase, our backend, and Tokocrypto uses HTTPS/TLS.
 - Firebase Auth tokens are short-lived and rotated by the Google Identity SDK.
 - The optional app PIN is hashed with SHA-256 before being saved on the device.
 - Firestore security rules restrict each user to their own `users/{uid}` tree and to shared wallets they belong to.
@@ -181,6 +185,7 @@ Depending on where you live, you may have rights under laws such as the EU/UK GD
 - **Correct** inaccurate data, mostly by editing it in the App.
 - **Delete** your data, by:
   - Removing individual records inside the App, or
+  - Using Settings > Data > Delete account to delete your Firebase sign-in, MYONE cloud sync data, entitlement records, feedback history, and local data on that device, or
   - Uninstalling the App to remove on-device data, or
   - Emailing the contact in section 12 with the email tied to your account so we can delete cloud data tied to that account.
 - **Export** your data from inside the App, where export features are available.
@@ -220,6 +225,7 @@ Continued use of MYONE after a change means you accept the updated Policy.
 For privacy questions, requests, or complaints:
 
 - Email: dailyapp.support@gmail.com
+- Account deletion instructions: https://dailyappsupport-source.github.io/myone-legal/account-deletion
 - Postal address: Available upon verified request by email.
 - Governing law: Laws of the Republic of Indonesia.
 
@@ -243,8 +249,9 @@ This appendix mirrors the answers you should provide on the Play Console **App c
 | Photos and videos | Photos | Yes (only if user attaches receipts) | Yes | No | No | App functionality |
 | Files and docs | Files and docs | Yes (only if user enables Drive backup) | Yes | No | No | App functionality |
 | App activity | App interactions | Yes (only data the user creates: categories, accounts, etc.) | Yes | No | No | App functionality |
+| App info and performance | Crash logs | Yes (if the app crashes) | No | No | No | Crash diagnostics |
 | Messages | None | No | – | – | – | – |
-| Audio | None | No | – | – | – | – |
+| Audio | Voice or sound recordings | Yes (only when user uses AI voice input) | Yes | No | Yes | App functionality |
 | Calendar | None | No | – | – | – | – |
 | Contacts | None | No | – | – | – | – |
 | Location | None | No | – | – | – | – |
@@ -260,7 +267,7 @@ This appendix mirrors the answers you should provide on the Play Console **App c
 ### Disclosures
 
 - The App does **not** include any third-party advertising SDKs.
-- The App does **not** include any third-party analytics SDKs.
+- The App uses Firebase Crashlytics for crash diagnostics, not advertising or product analytics.
 - The App does process subscription purchases through Google Play Billing.
 
 ---
@@ -270,11 +277,15 @@ This appendix mirrors the answers you should provide on the Play Console **App c
 For maintainers, the assertions in this Policy reflect the following code paths. Update both this Policy and the corresponding files together when behavior changes.
 
 - Permissions: `app/src/main/AndroidManifest.xml`
-- Backup and data extraction rules: `app/src/main/res/xml/backup_rules.xml`, `data_extraction_rules.xml`
-- Drive scope: `core-auth/DriveBackupManager.kt`, `core-auth/GoogleAuthManager.kt` (uses `DriveScopes.DRIVE_FILE`)
-- PIN hashing: `core-data/storage/delegates/SettingsStorageDelegator.kt` (SHA-256)
+- Android Auto Backup disabled: `app/src/main/AndroidManifest.xml`
+- Optional Drive backup: `app/src/main/java/com/dailyapp/myone/core/auth/DriveBackupManager.kt`
+- Drive scope: `app/src/main/java/com/dailyapp/myone/core/auth/DriveBackupManager.kt`, `app/src/main/java/com/dailyapp/myone/core/auth/GoogleAuthManager.kt` (uses `DriveScopes.DRIVE_FILE`)
+- AI voice input: `app/src/main/java/com/dailyapp/myone/ui/ai/AiAssistantSheet.kt` (uses `RECORD_AUDIO`)
+- Crash diagnostics: `app/src/main/java/com/dailyapp/myone/core/domain/util/ErrorLogger.kt`, Firebase Crashlytics dependency in `app/build.gradle.kts`
+- PIN hashing: `core/core-data/src/main/java/com/dailyapp/myone/core/data/storage/delegates/SettingsStorageDelegator.kt` (SHA-256)
+- Account deletion: `app/src/main/java/com/dailyapp/myone/ui/settings/screens/SettingsDataScreen.kt`, `functions/account.js`
 - Personal sync path: `users/{uid}` (`README.md`, `firestore.rules`)
 - Shared-wallet invite path: Cloud Functions in `functions/`
-- Crypto price source: CoinGecko (`BuildConfig.COINGECKO_CRYPTO_ENABLED`)
+- Crypto and PAXG-derived gold price source: Tokocrypto (`BuildConfig.TOKOCRYPTO_MARKET_ENABLED`)
 - Backend host: `BuildConfig.API_BASE_URL = https://api.myone.dailyapp.com`
 - Push notifications: `MyoneFirebaseMessagingService` registered in `AndroidManifest.xml`
