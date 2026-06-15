@@ -1,7 +1,7 @@
 # MYONE Privacy Policy
 
 **Effective date:** 16 May 2026
-**Last updated:** 2 June 2026
+**Last updated:** 15 June 2026
 
 This Privacy Policy describes how the MYONE Android application ("MYONE", the "App", "we", "us", "our") collects, uses, stores, shares, and protects your information when you install or use the App.
 
@@ -32,6 +32,7 @@ When you use the App you create financial records yourself. These records may in
 - Budgets, savings goals, recurring transactions, installments, debt plans, scenarios, and notification reminders.
 - Holdings or trade entries (ticker, quantity, purchase price, fees, dates) for investment accounts.
 - Shared wallet membership and transactions you choose to record inside a shared wallet.
+- Family Space records, if you create or join one, such as the Family Space name, member list, linked shared wallet IDs, shared planning records, activity history, and Family Space settings.
 - Settings such as preferred currency, theme, language, reminders, and onboarding state.
 - Optional 4 to 6 digit app PIN. The PIN is **never stored in plain text**. We store only a SHA-256 hash of the PIN, on your device.
 
@@ -110,6 +111,8 @@ If you sign in, your **personal** data is mirrored under `users/{your_uid}` in C
 
 If you create or join a **shared wallet**, the shared transactions and member list live under `sharedWallets/{walletId}`. Each member can read and contribute to that wallet. Invite codes are created and accepted through Firebase Cloud Functions; clients cannot write directly to invite documents.
 
+If you create or join **Family Space**, Family Space metadata lives under `familySpaces/{spaceId}` and references existing shared wallets instead of moving their records. Family Space members can see the Family Space member list, linked shared wallets, shared wallet records they are members of, family activity, and shared planning records. Family Space does not expose your personal accounts, personal transactions, personal budgets, personal goals, personal reports, personal AI prompts, or Google Drive backups to other members.
+
 ### 4.3 Google Drive backup (optional)
 
 If you connect Google Drive from Settings, MYONE asks for the **`drive.file`** scope. This scope only lets MYONE see and manage files that MYONE itself creates in Drive. We **cannot** see your other Drive files, photos, documents, or folders. We can:
@@ -169,7 +172,7 @@ These providers process data on our behalf under their own security and privacy 
 - All network traffic between the App, Firebase, our backend, and Tokocrypto uses HTTPS/TLS.
 - Firebase Auth tokens are short-lived and rotated by the Google Identity SDK.
 - The optional app PIN is hashed with SHA-256 before being saved on the device.
-- Firestore security rules restrict each user to their own `users/{uid}` tree and to shared wallets they belong to.
+- Firestore security rules restrict each user to their own `users/{uid}` tree, to shared wallets they belong to, and to Family Spaces where they are a member.
 - Shared-wallet invite acceptance runs only inside trusted Cloud Functions, not directly from the client.
 - Receipt images and the local database live in the App's private storage, which Android isolates from other apps.
 
@@ -185,7 +188,7 @@ Depending on where you live, you may have rights under laws such as the EU/UK GD
 - **Correct** inaccurate data, mostly by editing it in the App.
 - **Delete** your data, by:
   - Removing individual records inside the App, or
-  - Using Settings > Data > Delete account to delete your Firebase sign-in, MYONE cloud sync data, entitlement records, feedback history, and local data on that device, or
+  - Using Settings > Data > Delete account to delete your Firebase sign-in, MYONE cloud sync data, entitlement records, feedback history, Family Space membership, and local data on that device, or
   - Uninstalling the App to remove on-device data, or
   - Emailing the contact in section 12 with the email tied to your account so we can delete cloud data tied to that account.
 - **Export** your data from inside the App, where export features are available.
@@ -286,6 +289,7 @@ For maintainers, the assertions in this Policy reflect the following code paths.
 - Account deletion: `app/src/main/java/com/dailyapp/myone/ui/settings/screens/SettingsDataScreen.kt`, `functions/account.js`
 - Personal sync path: `users/{uid}` (`README.md`, `firestore.rules`)
 - Shared-wallet invite path: Cloud Functions in `functions/`
+- Family Space paths and invite lifecycle: `familySpaces/{spaceId}`, `familySpaceInvitations/{code}`, Cloud Functions in `functions/family.js`
 - Crypto and PAXG-derived gold price source: Tokocrypto (`BuildConfig.TOKOCRYPTO_MARKET_ENABLED`)
 - Backend host: `BuildConfig.API_BASE_URL = https://api.myone.dailyapp.com`
 - Push notifications: `MyoneFirebaseMessagingService` registered in `AndroidManifest.xml`
